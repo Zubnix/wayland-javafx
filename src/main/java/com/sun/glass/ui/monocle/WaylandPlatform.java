@@ -34,6 +34,7 @@ public class WaylandPlatform extends NativePlatform implements WlRegistryEvents 
     private       WaylandSeat       waylandSeat;
 
     WaylandPlatform(@Nonnull final WlDisplayProxy wlDisplayProxy) {
+        LinuxSystem.getLinuxSystem().loadLibrary();
         this.wlDisplayProxy = wlDisplayProxy;
     }
 
@@ -146,8 +147,21 @@ public class WaylandPlatform extends NativePlatform implements WlRegistryEvents 
     }
 
     @Override
+    public synchronized AcceleratedScreen getAcceleratedScreen(final int[] attributes) throws GLException, UnsatisfiedLinkError {
+        if (accScreen == null) {
+            accScreen = new WaylandAcceleratedScreen(attributes);
+        }
+        return accScreen;
+    }
+
+    @Override
     public void globalRemove(final WlRegistryProxy emitter,
                              final int name) {
         //TODO listen for eg seat removals
+    }
+
+    @Nonnull
+    public WlDisplayProxy getWlDisplayProxy() {
+        return wlDisplayProxy;
     }
 }

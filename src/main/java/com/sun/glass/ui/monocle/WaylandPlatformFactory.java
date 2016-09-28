@@ -33,7 +33,6 @@ public class WaylandPlatformFactory extends NativePlatformFactory {
             return waylandPlatform;
         });
 
-
         try {
             return waylandPlatformFuture.get();
         }

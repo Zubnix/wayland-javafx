@@ -129,6 +129,10 @@ class WaylandScreen implements NativeScreen,
         return this.wlSurfaceProxy.getPointer();
     }
 
+    public WlSurfaceProxy getWlSurfaceProxy() {
+        return wlSurfaceProxy;
+    }
+
     @Override
     public void shutdown() {
 
