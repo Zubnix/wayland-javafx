@@ -25,6 +25,7 @@ public class WaylandInputDevicePointer implements InputDevice, WlPointerEventsV5
 
     //the protocol version supported by the compositor for this object
     private final int version;
+    private int       enterSerial;
 
     WaylandInputDevicePointer(@Nonnull final WlSeatProxy wlSeatProxy) {
         this.wlPointerProxy = wlSeatProxy.getPointer(this);
@@ -63,6 +64,7 @@ public class WaylandInputDevicePointer implements InputDevice, WlPointerEventsV5
                       @Nonnull final Fixed surfaceX,
                       @Nonnull final Fixed surfaceY) {
         //NOOP. we only create one surface (window), so it always has the focus by default.
+        this.enterSerial = serial;
     }
 
     @Override
@@ -211,5 +213,9 @@ public class WaylandInputDevicePointer implements InputDevice, WlPointerEventsV5
     @Nonnull
     public WlPointerProxy getWlPointerProxy() {
         return this.wlPointerProxy;
+    }
+
+    public int getEnterSerial() {
+        return enterSerial;
     }
 }

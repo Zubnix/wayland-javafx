@@ -13,6 +13,7 @@ import org.freedesktop.wayland.client.WlShmProxy;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.concurrent.ExecutionException;
 
 public class WaylandPlatform extends NativePlatform implements WlRegistryEvents {
 
@@ -22,16 +23,15 @@ public class WaylandPlatform extends NativePlatform implements WlRegistryEvents 
      */
 
     @Nonnull
-    private final WlDisplayProxy wlDisplayProxy;
-
+    private final WlDisplayProxy    wlDisplayProxy;
     @Nullable
-    private WlCompositorProxy compositorProxy;
+    private       WlCompositorProxy compositorProxy;
     @Nullable
-    private WlShellProxy      shellProxy;
+    private       WlShellProxy      shellProxy;
     @Nullable
-    private WaylandShm        waylandShm;
-    private WaylandOutput     waylandOutput;
-    private WaylandSeat       waylandSeat;
+    private       WaylandShm        waylandShm;
+    private       WaylandOutput     waylandOutput;
+    private       WaylandSeat       waylandSeat;
 
     WaylandPlatform(@Nonnull final WlDisplayProxy wlDisplayProxy) {
         this.wlDisplayProxy = wlDisplayProxy;
@@ -42,18 +42,26 @@ public class WaylandPlatform extends NativePlatform implements WlRegistryEvents 
     }
 
     protected WaylandCursor createCursor() {
-        if (this.waylandShm == null ||
-            this.compositorProxy == null) {
-            ensureGlobals();
-        }
+        try {
+            return WaylandPlatformFactory.WL_LOOP.submit(() -> {
+                if (this.waylandShm == null ||
+                    this.compositorProxy == null) {
+                    ensureGlobals();
+                }
 
-        if (this.waylandSeat == null) {
-            return null;
+                if (this.waylandSeat == null) {
+                    return null;
+                }
+                else {
+                    return new WaylandCursor(this.waylandShm.getWlShmProxy(),
+                                             this.compositorProxy,
+                                             this.waylandSeat);
+                }
+            })
+                                                 .get();
         }
-        else {
-            return new WaylandCursor(this.waylandShm.getWlShmProxy(),
-                                     this.compositorProxy,
-                                     this.waylandSeat);
+        catch (InterruptedException | ExecutionException e) {
+            throw new Error(e);
         }
     }
 
@@ -70,18 +78,26 @@ public class WaylandPlatform extends NativePlatform implements WlRegistryEvents 
     }
 
     protected WaylandScreen createScreen() {
-        if (this.waylandOutput == null ||
-            this.compositorProxy == null ||
-            this.shellProxy == null ||
-            this.waylandShm == null) {
-            ensureGlobals();
+        try {
+            return WaylandPlatformFactory.WL_LOOP.submit(() -> {
+                if (this.waylandOutput == null ||
+                    this.compositorProxy == null ||
+                    this.shellProxy == null ||
+                    this.waylandShm == null) {
+                    ensureGlobals();
+                }
+                return new WaylandScreen(new WaylandBufferPoolFactory(),
+                                         this.wlDisplayProxy,
+                                         this.waylandOutput,
+                                         this.compositorProxy,
+                                         this.shellProxy,
+                                         this.waylandShm);
+            })
+                                                 .get();
         }
-        return new WaylandScreen(new WaylandBufferPoolFactory(),
-                                 this.wlDisplayProxy,
-                                 this.waylandOutput,
-                                 this.compositorProxy,
-                                 this.shellProxy,
-                                 this.waylandShm);
+        catch (InterruptedException | ExecutionException e) {
+            throw new Error(e);
+        }
     }
 
     @Override

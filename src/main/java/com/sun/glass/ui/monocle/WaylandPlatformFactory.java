@@ -42,7 +42,7 @@ public class WaylandPlatformFactory extends NativePlatformFactory {
         }
     }
 
-    private void loop(final WlDisplayProxy wlDisplayProxy) {
+    public void loop(final WlDisplayProxy wlDisplayProxy) {
         wlDisplayProxy.roundtrip();
         WL_LOOP.submit(() -> loop(wlDisplayProxy));
     }
