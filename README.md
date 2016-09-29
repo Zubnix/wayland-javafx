@@ -10,7 +10,7 @@ TODO:
  - Create a non monocle, desktop enabled wayland back-end.
  
 DONE:
- - output using hw rendering (via wayland drm buffers). Requires a patch for JavaFX shader bug. Fix available [here](https://bitbucket.org/javafxports/8u60-rt/commits/595633bbaae36f98d85d47d276294442ea43488c).
+ - output using hw rendering (via wayland drm buffers). Requires a patch for JavaFX shader bug. Fix available [here](https://bitbucket.org/javafxports/8u60-rt/commits/595633bbaae36f98d85d47d276294442ea43488c). This patch is not needed if you intent to use sw rendering.
  - output using sw rendering (via wayland shared memory buffers)
  - input handling through wayland's input protocols (keyboard+pointer+touch)
 
@@ -36,6 +36,6 @@ This library *will* make use of libraries not present in a standard jdk/jfx inst
  
  - Copy the ```./target/wayland-javafx-1.0.0-SNAPSHOT.jar``` to your local jdk installation's ext folder; eg. ```/usr/lib/jvm/oracle-jdk-bin-1.8/jre/lib/ext/```
 
- - Run your javafx application; eg. ```unset DISPLAY && java -Dglass.platform=Monocle -Dmonocle.platform=Wayland -Dembedded=monocle -jar Ensemble8.jar```
+ - Run your javafx application; eg. ```unset DISPLAY && java -Dglass.platform=Monocle -Dmonocle.platform=Wayland -Dembedded=monocle -jar Ensemble8.jar```. Leave out the ```-Dembedded=monocle``` option when using the sw renderer.
  
  - Make sure you delete ```wayland-javafx-1.0.0-SNAPSHOT.jar``` from your jdk installation once you're done as it might introduce some unwanted behavior in other programs.
