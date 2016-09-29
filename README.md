@@ -4,13 +4,13 @@ A Wayland backend for JavaFX.
 This is a work in progress. Currently software rendering, mouse & keyboard works (touch too but untested).
 
 TODO:
- - output using hw rendering (via wayland drm buffers).
  - Rewrite & cleanup code to production quality standards.
  - Remove all 3rd party jdk libraries.
  - Include in openjfx as monocle back-end?
  - Create a non monocle, desktop enabled wayland back-end.
  
 DONE:
+ - output using hw rendering (via wayland drm buffers). Requires a patch for JavaFX shader bug. Fix available [here](https://bitbucket.org/javafxports/8u60-rt/commits/595633bbaae36f98d85d47d276294442ea43488c).
  - output using sw rendering (via wayland shared memory buffers)
  - input handling through wayland's input protocols (keyboard+pointer+touch)
 
