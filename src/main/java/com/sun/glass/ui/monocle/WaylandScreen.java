@@ -6,7 +6,6 @@ import org.freedesktop.jaccall.Pointer;
 import org.freedesktop.wayland.client.WlBufferProxy;
 import org.freedesktop.wayland.client.WlCallbackProxy;
 import org.freedesktop.wayland.client.WlCompositorProxy;
-import org.freedesktop.wayland.client.WlDisplayProxy;
 import org.freedesktop.wayland.client.WlOutputProxy;
 import org.freedesktop.wayland.client.WlShellProxy;
 import org.freedesktop.wayland.client.WlShellSurfaceEvents;
@@ -20,7 +19,6 @@ import javax.annotation.Nonnull;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
-import java.util.concurrent.CountDownLatch;
 
 import static com.sun.glass.ui.monocle.Libpixman1.PIXMAN_OP_OVER;
 import static com.sun.glass.ui.monocle.Libpixman1.PIXMAN_OP_SRC;
@@ -142,10 +140,9 @@ class WaylandScreen implements NativeScreen,
                              final int width,
                              final int height,
                              final float alpha) {
+        //TODO this call should block if no more buffers are available & it should unblock as soon as the compositor releases one.
 
         WaylandPlatformFactory.WL_LOOP.submit(() -> {
-            //TODO this call should block if no more buffers are available & it should unblock as soon as the compositor release one.
-            //-> we don't have to wait here, but instead can initiate a wait as soon as we actually need a buffer (eg uploadPixels).
 
             if (this.wlBufferProxy == null) {
                 this.wlBufferProxy = this.waylandBufferPool.popBuffer();
@@ -218,24 +215,27 @@ class WaylandScreen implements NativeScreen,
 
     @Override
     public void swapBuffers() {
-        final CountDownLatch countDownLatch = new CountDownLatch(1);
         WaylandPlatformFactory.WL_LOOP.submit(() -> {
             if (this.wlCallbackProxy != null) {
                 this.wlCallbackProxy.destroy();
             }
             this.wlCallbackProxy = this.wlSurfaceProxy.frame((emitter, callbackData) -> {
-                countDownLatch.countDown();
+                synchronized (framebufferSwapLock) {
+                    framebufferSwapLock.notifyAll();
+                }
             });
             this.wlSurfaceProxy.commit();
             this.wlBufferProxy = null;
         });
 
         //this blocks until we receive feedback from the compositor that a next redraw should happen
-        try {
-            countDownLatch.await();
-        }
-        catch (final InterruptedException e) {
-            e.printStackTrace();
+        synchronized (framebufferSwapLock) {
+            try {
+                framebufferSwapLock.wait();
+            }
+            catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 
