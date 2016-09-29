@@ -31,7 +31,6 @@ class WaylandScreen implements NativeScreen,
                                WlShellSurfaceEvents {
 
     private final WlSurfaceProxy    wlSurfaceProxy;
-    private final WlDisplayProxy    display;
     private final WaylandOutput     waylandOutput;
     private final WaylandBufferPool waylandBufferPool;
     private       int               dpi;
@@ -56,19 +55,17 @@ class WaylandScreen implements NativeScreen,
      */
 
     WaylandScreen(final WaylandBufferPoolFactory waylandBufferPoolFactory,
-                  final WlDisplayProxy wlDisplayProxy,
                   final WaylandOutput waylandOutput,
                   final WlCompositorProxy wlCompositorProxy,
                   final WlShellProxy wlShellProxy,
                   final WaylandShm waylandShm) {
-        this.display = wlDisplayProxy;
         this.waylandOutput = waylandOutput;
 
         this.wlSurfaceProxy = wlCompositorProxy.createSurface(this);
         final WlShellSurfaceProxy shellSurface = wlShellProxy.getShellSurface(this,
                                                                               this.wlSurfaceProxy);
         //notify the compositor we want to run fullscreen
-        shellSurface.setFullscreen(WlShellSurfaceFullscreenMethod.DRIVER.value,
+        shellSurface.setFullscreen(WlShellSurfaceFullscreenMethod.FILL.value,
                                    0,
                                    waylandOutput.getWlOutputProxy());
 

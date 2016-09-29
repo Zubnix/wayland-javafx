@@ -88,7 +88,6 @@ public class WaylandPlatform extends NativePlatform implements WlRegistryEvents 
                     ensureGlobals();
                 }
                 return new WaylandScreen(new WaylandBufferPoolFactory(),
-                                         this.wlDisplayProxy,
                                          this.waylandOutput,
                                          this.compositorProxy,
                                          this.shellProxy,
